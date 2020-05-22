@@ -6,7 +6,11 @@ import astropy.units as u
 import os
 from astropy.table import Table, Column
 import scipy.constants as const
+from scipy.interpolate import interp1d
+from scipy import integrate
 from scipy.optimize import curve_fit
+from scipy.signal import argrelmin
+
 c_c = const.c
 k_c = const.k
 h_c = const.h
@@ -69,3 +73,45 @@ def match_src_to_catalog(src_ra, src_dec, cat_ra, cat_dec):
     catalog = SkyCoord(ra=cat_ra*u.degree, dec=cat_dec*u.degree)  
     idx, d2d, d3d = c.match_to_catalog_sky(catalog)
     return idx, d2d
+
+### Below is stuff for match filter algorithm
+
+def dbdt(f,T):#      #t in K, f in Hz; returns SI units
+    x = h_c*f/(k_c*T)
+    return (2*h_c*f**3/c_c**2) / (np.exp(x)-1.0)**2 * (x/T) * np.exp(x)
+
+def dcmbrdt(f):
+    return dbdt(f, 2.726)
+
+def calc_nu_eff1(nu, transmission, source_spectrum, nonusq=True):
+    #expects input nu in GHz
+    nu_interp = np.arange(1e4)/1e4*(np.max(nu)-np.min(nu)+20.) + np.min(nu) - 10.
+
+    dbdt = dcmbrdt(nu*1.e9)
+
+    if nonusq:
+        bw_source = integrate.simps(transmission*source_spectrum,nu)
+        bw_cmb = integrate.simps(transmission*dbdt,nu)
+    else:
+        bw_source = integrate.simps(transmission*source_spectrum/nu**2,nu)
+        bw_cmb = integrate.simps(transmission*dbdt/nu**2,nu)
+    f = interp1d(nu, source_spectrum,fill_value="extrapolate")
+    ss_interp = f(nu_interp)
+    dbdt_interp = dcmbrdt(nu_interp*1e9)
+    whlow = np.where(nu_interp <= 40.)[0]
+    if np.any(nu_interp<= 40.) == True:
+        dbdt_interp[whlow] = 1e12
+    ratio1 = bw_source/bw_cmb
+    ratio2 = ss_interp/dbdt_interp
+    dss = np.abs(ratio1-ratio2)
+    minima_ind = argrelmin(np.log(dss),order=10)[0]
+    if len(minima_ind) > 1:
+        band_start = np.min(nu[transmission>0.2])
+        band_end = np.max(nu[transmission>0.2])
+        band_cent = (band_start+band_end)/2.
+        true_min = np.where(np.abs(band_cent-nu_interp[minima_ind]) == np.min(np.abs(band_cent-nu_interp[minima_ind])))[0][0]
+        nu_eff = nu_interp[minima_ind[true_min]]
+    else:
+        nu_eff = nu_interp[minima_ind]
+    return nu_eff
+
