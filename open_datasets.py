@@ -1,4 +1,4 @@
-import numpy as numpy
+import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from sptpol_software.util import idl
@@ -39,11 +39,7 @@ def get_SPIRE_ptsrcs(catalog_dir, sn_cut=40):
 	cat_f_250 = cat_f_250[sn_cut]
 	cat_df_250 = cat_df_250[sn_cut]
 
-	src_ra = cat_ra
-	src_dec = cat_dec
-	src_flux = cat_f_250
-
-	return cat_ra, cat_dec, cat_flux
+	return cat_ra, cat_dec, cat_f_250
 
 def get_Spitzer_DES_cat_with_mass(sp_des_dir,stellar_m_dir,iband_cut=23):
 	sp_des_cat = fits.open(sp_des_dir)[1].data
@@ -62,5 +58,5 @@ def get_Spitzer_DES_cat_with_mass(sp_des_dir,stellar_m_dir,iband_cut=23):
 
 	return clean_cat
 
-def Herschel_filtered_maps_
+
 

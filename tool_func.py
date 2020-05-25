@@ -1,10 +1,11 @@
-import numpy as numpy
+import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import astropy.coordinates as coord
 import astropy.units as u
 import os
 from astropy.table import Table, Column
+from astropy.coordinates import SkyCoord
 import scipy.constants as const
 from scipy.interpolate import interp1d
 from scipy import integrate
@@ -43,28 +44,32 @@ def bootstrap(n_real, sample_len, galaxy_arr):
     return mad(bs_med)
 
 def noise_PSD(zp_map, reso_arcmin, dngrid):
+    '''
+    Calculate the noise PSD given a map, code given by Lindsey
+    '''
     reso = (reso_arcmin/60)*np.pi/180.
     dk = 1./dngrid/reso
     factor = np.sqrt(dngrid**2*dk**2)
     noise_psd = np.sqrt(np.abs(np.fft.ifft2(zp_map)/factor))
+    return noise_psd
 
-def zero_pad_map(masked_map):
+def zero_pad_map(masked_map,mask):
     #converting the nans in the masked map to 0s and zero padding map to have square shape
     zeros_masked_map = np.nan_to_num(masked_map)
     if zeros_masked_map.shape[0] != zeros_masked_map.shape[1]:
         zp_mask_map = np.zeros((max(zeros_masked_map.shape),max(zeros_masked_map.shape)))
+        zp_mask = np.zeros((zp_mask_map.shape))
         if zp_mask_map.shape[0]>zeros_masked_map.shape[0]:
             edge_padding = (zp_mask_map.shape[0]-zeros_masked_map.shape[0])/2
             zp_mask_map[edge_padding:-edge_padding, :] = zeros_masked_map
+            zp_mask[edge_padding:-edge_padding, :] = mask
         elif zp_mask_map.shape[1]>zeros_masked_map.shape[1]: 
             edge_padding = (zp_mask_map.shape[1]-zeros_masked_map.shape[1])/2
             zp_mask_map[:, edge_padding:-edge_padding] = zeros_masked_map
+            zp_mask[:,edge_padding:-edge_padding] = mask
     else:
         zp_mask_map = zeros_masked_map
-    pixelmask = np.zeros((max(zeros_masked_map.shape),max(zeros_masked_map.shape)))
-    pixelmask[edge_padding:-edge_padding, :] = mask
-    zp_mask = np.zeros((zp_mask_map.shape))
-    zp_mask[edge_padding:-edge_padding, :] = mask
+        zp_mask = mask
 
     return zp_mask_map, zp_mask
 
@@ -83,8 +88,11 @@ def dbdt(f,T):#      #t in K, f in Hz; returns SI units
 def dcmbrdt(f):
     return dbdt(f, 2.726)
 
-def calc_nu_eff1(nu, transmission, source_spectrum, nonusq=True):
-    #expects input nu in GHz
+def calc_nu_eff(nu, transmission, source_spectrum, nonusq=True):
+    '''
+    Based on Tom's IDL code, modified so it can handle 2 minima due to CMB peak
+    expects input nu in GHz
+    '''
     nu_interp = np.arange(1e4)/1e4*(np.max(nu)-np.min(nu)+20.) + np.min(nu) - 10.
 
     dbdt = dcmbrdt(nu*1.e9)

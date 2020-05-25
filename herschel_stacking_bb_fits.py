@@ -72,7 +72,7 @@ for mapfreq in ["250", "350","500"]:
 
 	mask = maps.makeApodizedPointSourceMask(map0, source_mask, ftype = 'herschel', reso_arcmin=reso_arcmin, center=radec0, radius_arcmin=3)
 	masked_map = np.multiply(mask,map0)
-	zp_mask_map, zp_mask = t.zero_pad_map(masked_map)
+	zp_mask_map, zp_mask = t.zero_pad_map(masked_map, mask)
 
 	#calculating noise PSD
 	noise_psd = t.noise_PSD(zp_mask_map, reso_arcmin, dngrid=zp_mask_map.shape[0])
@@ -131,7 +131,7 @@ for i in range(len(sm_bins)-1):
 
 		ypix, xpix = sky.ang2Pix(np.asarray([clean_cat['ra'], clean_cat['dec']]), radec0, reso_arcmin, npixels,proj=5)[0]
 		ypixmask, xpixmask = sky.ang2Pix(np.asarray([clean_cat['ra'], clean_cat['dec']]), radec0, reso_arcmin, npixels,proj=5)[1] 
-		ang2pix_mask = (ypixmask == True) & (xpixmask == True) & (pixelmask[ypix,xpix]>0.99999999)
+		ang2pix_mask = (ypixmask == True) & (xpixmask == True) & (zp_mask[ypix,xpix]>0.99999999)
 		clean_cat = clean_cat[ang2pix_mask]
 
 		idx, d2d = t.match_src_to_catalog(clean_cat['ra'], clean_cat['dec'], src_ra, src_dec)
@@ -204,8 +204,6 @@ for i in range(len(sm_bins)-1):
 	# plt.savefig('/data/tangq/blackbody_plots/'+today+'_Herschel_gal_stacking_SM'+str(i)+'.png')
 	# plt.close()
 
-
-
 	fig, axarr1 = plt.subplots(int(ceil((len(z_bins)-1)/4.)),4, squeeze=True,sharex=True, sharey=False, figsize=(20,5*int(ceil((len(z_bins)-1)/4.))))
 	chi2_arr = np.zeros((len(z_bins)-1,21,len(T_set)))
 	for z_i in range(len(z_bins)-1):
@@ -217,10 +215,10 @@ for i in range(len(sm_bins)-1):
 		chi2_arr = np.zeros((len(z_set),len(T_set)))
 		for m, z in enumerate(z_set):
 		    for n, T in enumerate(T_set):
-		        popt, pcov = curve_fit(lambda p1, p2: mod_BB_curve_with_z(p1, p2, T, z), freqs, stacked_flux, \
+		        popt, pcov = curve_fit(lambda p1, p2: t.mod_BB_curve_with_z(p1, p2, T, z), freqs, stacked_flux, \
 		                       sigma = stacked_flux_err, p0 = [1.e-10], \
 		                       maxfev=10000)
-		        chi2_arr[m,n] = np.sum((mod_BB_curve_with_z(freqs, popt[0],T,z)-stacked_flux)**2/stacked_flux_err**2/dof)
+		        chi2_arr[m,n] = np.sum((t.mod_BB_curve_with_z(freqs, popt[0],T,z)-stacked_flux)**2/stacked_flux_err**2/dof)
 
 	# 	##--------- for 2D images of chi2 ---------##
 	# 	im = axarr1[int(z_i/4), z_i % 4].imshow(chi2_arr, interpolation=None,vmin=0,vmax=min([1.e6, np.max(chi2_arr)]),extent=[z_set[0], z_set[-1], T_set[-1], T_set[0]])
@@ -246,17 +244,10 @@ for i in range(len(sm_bins)-1):
 	plt.savefig('/data/tangq/blackbody_plots/'+today+'Herschel_gal_stacking_SM'+str(i)+'chi2_BBfits_1D.png')
 	plt.close()
 
-
-	print "SM Bin " + str(i)
-
-
-
-
 	np.save('/home/tangq/chi2_array_SM'+str(i)+'.npy', chi2_arr)
 	print "SM Bin " + str(i)
 
 print "min redshift: " +str(min_z)+  ", max redshift: " + str(max_z)
-
 
 plt.figure()
 plt.plot(sm_bins, num_obj_zbins)
