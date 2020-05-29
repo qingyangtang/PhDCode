@@ -92,6 +92,7 @@ def calc_nu_eff(nu, transmission, source_spectrum, nonusq=True):
     '''
     Based on Tom's IDL code, modified so it can handle 2 minima due to CMB peak
     expects input nu in GHz
+    WARNING: only compatible with SciPy versions >=0.17
     '''
     nu_interp = np.arange(1e4)/1e4*(np.max(nu)-np.min(nu)+20.) + np.min(nu) - 10.
 
@@ -123,3 +124,17 @@ def calc_nu_eff(nu, transmission, source_spectrum, nonusq=True):
         nu_eff = nu_interp[minima_ind]
     return nu_eff
 
+def herschel_calculate_eff_band(freq, trans, T, z):
+    wavelength = c_c/(freq*1.e9)
+
+    eff_bands_500 = calc_nu_eff(freq, trans[0],mod_BB_curve_with_z(wavelength,1, T, z))
+    eff_bands_350 = calc_nu_eff(freq, trans[1],mod_BB_curve_with_z(wavelength,1, T, z))
+    eff_bands_250 = calc_nu_eff(freq, trans[2],mod_BB_curve_with_z(wavelength,1, T, z))
+    return np.asarray([eff_bands_250, eff_bands_350, eff_bands_500])
+
+def get_eff_band(lookup_table, T, z):
+    z_set = lookup_table[:,0,0]
+    T_set = lookup_table[0,:,0]
+    z_ind = np.where(np.abs(z_set-z)==np.min(np.abs(z_set-z)))[0][0]
+    T_ind = np.where(np.abs(T_set-T)==np.min(np.abs(T_set-T)))[0][0]
+    return lookup_table[z_ind, T_ind, :]
