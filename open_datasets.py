@@ -42,6 +42,15 @@ def get_SPIRE_ptsrcs(catalog_dir, sn_cut=40):
 
 	return cat_ra, cat_dec, cat_f_250
 
+def get_SPTSZ_ptsrcs(mapfreq, field="ra23h30dec-55_allyears"):
+	source_mask = '/data/tangq/wendymaps/'+field+'/source_list_3sig_allyears_'+mapfreq+'.dat'
+	source_list = np.loadtxt(source_mask)
+	src_ra = source_list[:,3]
+	src_dec = source_list[:,4]
+	src_flux = source_list[:,6]
+
+	return src_ra,src_dec,src_flux
+
 def get_Spitzer_DES_cat_with_mass(sp_des_dir,stellar_m_dir,iband_cut=23):
 	sp_des_cat = fits.open(sp_des_dir)[1].data
 	stellar_cat = np.loadtxt(stellar_m_dir)
@@ -58,6 +67,46 @@ def get_Spitzer_DES_cat_with_mass(sp_des_dir,stellar_m_dir,iband_cut=23):
 	clean_cat = sp_des_sm_cat[mask]
 
 	return clean_cat
+
+def get_SPTSZ_filtered_map(units='uK',field="ra23h30dec-55_allyears"):
+	for mapfreq in ["90","150","220"]:
+		idldata = idl.readIDLSav("/data/tangq/wendymaps/"+field+"/maps_planck15cal_allyears_"+mapfreq+".sav")
+		pixelmask = idldata.pixel_mask
+		radec0 = idldata.radec0
+		reso_arcmin = idldata.reso_arcmin
+		npixels = np.asarray(idldata.cmap_k.shape)
+		# ra = np.linspace(radec0[0]-0.5, radec0[0]+0.5, 10)
+		# dec = np.linspace(radec0[1]-0.5, radec0[1]+0.5, 10)
+		# ypix30, xpix30 = sky.ang2Pix(np.asarray([ra, dec]), radec0, reso_arcmin, npixels,proj=5)[0]
+		if units=='uK':
+			cmap = idldata.cmap_k
+		elif units =='mJy':
+			cmap = idldata.cmap_mjy
+		if mapfreq =="90":
+			cmap90 = cmap
+			pixelmask90 = pixelmask
+			radec090 = radec0
+			reso_arcmin90 = reso_arcmin
+			npixels90 = npixels
+		elif mapfreq =="150":
+			cmap150 = cmap
+			pixelmask150 = pixelmask
+			radec0150 = radec0
+			reso_arcmin150 = reso_arcmin
+			npixels150 = npixels
+		elif mapfreq =="220":
+			cmap220 = cmap
+			pixelmask220 = pixelmask
+			radec0220 = radec0
+			reso_arcmin220 = reso_arcmin
+			npixels220 = npixels
+	cmap = [cmap90, cmap150, cmap220]
+	pixelmask = [pixelmask90,pixelmask150,pixelmask220]
+	reso_arcmin = [reso_arcmin90, reso_arcmin150, reso_arcmin220]
+	radec0 = [radec090,radec0150,radec0220]
+	npixels = [npixels90,npixels150, npixels220]
+	mapfreq = ["90", "150", "220"]
+	return cmap, pixelmask, radec0, reso_arcmin, npixels, mapfreq
 
 
 def make_Herschel_filtered_map(save_map = False, save_map_dir=None, save_map_fname=None):
