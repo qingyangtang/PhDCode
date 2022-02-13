@@ -1,0 +1,26 @@
+[map_and_files]
+
+beamfile = /data/tangq/SPIRE_maps/spire_beams_for_matched_filter.sav 
+trans_func_no_beam = /data/tangq/SPT/SZ/ra23h30dec-55_2year_xfer_function_no_beam_padded_map.sav
+proj = 0
+map = /data/tangq/debug/spt_smg_check/coadds_latest.sav
+apod_mask = /data/tangq/debug/spt_smg_check/masks_allbands_0p8.fits
+trans_func_beam = /data/tangq/debug/spt_smg_check/ra23h30dec-55_2year_xfer_function_with_beam.sav
+mapinfo = /data/tangq/debug/spt_smg_check/sptsz_field_info.sav
+source_mask = /home/tnatoli/gits_sptpol/sptpol_software/config_files/ptsrc_config_ra23h30dec-55_surveyclusters.txt
+trans_func = /data/tangq/SPT/SZ/ra23h30dec-55_2year_xfer_function_no_beam_padded_map.sav
+noise_psd_90 = /data/tangq/debug/spt_smg_check/psd_ra23h30dec-55_2year_90_wtd.sav
+noise_psd_150 = /data/tangq/debug/spt_smg_check/psd_ra23h30dec-55_2year_150_wtd.sav
+noise_psd_220 = /data/tangq/debug/spt_smg_check/psd_ra23h30dec-55_2year_220_wtd.sav
+beam90 = /data/tangq/SPT/bl_2010_90.txt
+beam150 = /data/tangq/SPT/bl_2010_150.txt
+beam220 = /data/tangq/SPT/bl_2010_220.txt
+
+[filter_map_settings]
+#for common_beam, set =0 if no smoothing
+common_beam = 0
+set_cmb = True
+cmb_file = /data/tnatoli/camb/planck_lensing_wp_highL_bestFit_20130627_massless0p046_massive3_lensedtotCls.dat
+#set skysig = None if not using else  /data/tangq/SPT/viero_cr20_cov_95_150_220_100_143_217_353_.sav
+skysig = /data/tangq/SPT/viero_cr20_cov_95_150_220_100_143_217_353_.sav
+

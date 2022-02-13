@@ -1,0 +1,21 @@
+[map_and_files]
+
+trans_func_90_no_beam = /data/tangq/SPT/SPTpol/tf90_sptpol.sav 
+trans_func_150_no_beam = /data/tangq/SPT/SPTpol/tf150_sptpol.sav 
+proj = 0
+map = /data/tangq/SPT/SPTpol/ra23h_cutout/sptpol_for_amy.sav
+apod_mask = /data/tangq/SPT/SZ/ra23h30dec-55_2year_padded_apod.sav
+source_mask = /home/tnatoli/gits_sptpol/sptpol_software/config_files/ptsrc_config_ra23h30dec-55_surveyclusters.txt
+noise_psd_90 = /data/tangq/SPT/SPTpol/ra23h_cutout/psds_90_sptpol.sav
+noise_psd_150 = /data/tangq/SPT/SPTpol/ra23h_cutout/psds_150_sptpol.sav
+beam90 = /data/tangq/SPT/SPTpol/sptpol_90ghz_beam.sav
+beam150 = /data/tangq/SPT/SPTpol/sptpol_150ghz_beam.sav
+
+[filter_map_settings]
+#for common_beam, set =0 if no smoothing
+common_beam = 1.7
+set_cmb = True
+cmb_file = /data/tnatoli/camb/planck_lensing_wp_highL_bestFit_20130627_massless0p046_massive3_lensedtotCls.dat
+#set skysig = None if not using else  /data/tangq/SPT/viero_cr20_cov_95_150_220_100_143_217_353_.sav
+skysig = /data/tangq/SPT/viero_cr20_cov_95_150_220_100_143_217_353_.sav
+

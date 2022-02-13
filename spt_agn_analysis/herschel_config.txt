@@ -1,0 +1,32 @@
+[beam_and_transfer_func]
+
+beamfile = /data/tangq/SPIRE_maps/spire_beams_for_matched_filter.sav 
+trans_func_no_beam = /data/tangq/SPT/SZ/ra23h30dec-55_2year_xfer_function_no_beam_padded_map.sav
+
+[map_and_ptsrc_list]
+
+proj = 0
+map250 = /data/tangq/SPIRE_maps/proj0_herschel_maps/spt_zea_itermap_10_iterations_15_arcsec_pixels_PSW.fits_v2.sav
+ptsrc250 = /data/tangq/SPIRE_maps/herschel_srcs_40_PSW_proj0.txt
+map350 = /data/tangq/SPIRE_maps/proj0_herschel_maps/spt_zea_itermap_10_iterations_15_arcsec_pixels_PMW.fits_v2.sav
+ptsrc350 = /data/tangq/SPIRE_maps/herschel_srcs_40_PMW_proj0.txt
+map500 = /data/tangq/SPIRE_maps/proj0_herschel_maps/spt_zea_itermap_10_iterations_15_arcsec_pixels_PLW.fits_v2.sav
+ptsrc500 = /data/tangq/SPIRE_maps/herschel_srcs_40_PLW_proj0.txt
+shift_radec0 = True
+
+## uncomment below if using proj5 maps and comment the proj0 block
+#map250 = /data/tangq/SPIRE_maps/spt_zea_itermap_10_iterations_15_arcsec_pixels_PSW.fits
+#ptsrc250 = /data/tangq/SPIRE_maps/herschel_srcs_40_PSW.txt
+#map350 = /data/tangq/SPIRE_maps/spt_zea_itermap_10_iterations_15_arcsec_pixels_PMW.fits
+#ptsrc350 = /data/tangq/SPIRE_maps/herschel_srcs_40_PMW.txt
+#map500 = /data/tangq/SPIRE_maps/spt_zea_itermap_10_iterations_15_arcsec_pixels_PLW.fits
+#ptsrc500 = /data/tangq/SPIRE_maps/herschel_srcs_40_PLW.txt
+
+[filter_map_settings]
+#for common_beam, set =0 if no smoothing
+common_beam = 1.0
+noise_psd = 0
+set_cmb = True
+cmb_file = /data/tnatoli/camb/planck_lensing_wp_highL_bestFit_20130627_massless0p046_massive3_lensedtotCls.dat
+#set skysig = None if not using else  /data/tangq/SPT/viero_cr20_cov_95_150_220_100_143_217_353_.sav
+skysig = None
